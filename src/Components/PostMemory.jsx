@@ -3,35 +3,44 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/esm/Col';
 import axios from "axios"
+import { useMutation } from '@apollo/client';
+import { POST_MEMORY } from '../Graphql/Mutation';
 
 const PostMemory = () => {
 
-    const [info, setInfo] = useState({})
+    const [name, setName] = useState('')
     const [file, setFile] = useState(null)
+    const [NewPost] = useMutation(POST_MEMORY)
 
     const handleBlur = (e) => {
-        const newInfo = { ...info }
-        newInfo[e.target.name] = e.target.value
-        setInfo(newInfo)
+        setName(e.target.value);
     }
 
     const handleChange = (e) => {
-        const newfile = e.target.files[0]
-        setFile(newfile)
+        setFile(e.target.files[0])
     }
 
     const submitForm = async (e) => {
 
+        e.preventDefault(e)
+
         const formData = new FormData()
         formData.append('file', file)
-        formData.append('name', info.name)
+        formData.append('name', name)
 
-        try {
-            const response = await axios.post('http://localhost:4000/api/memorypost', formData);
-            console.log(response.data);
-        } catch (error) {
-            console.error(error);
-        }
+        NewPost({
+            variables: {
+                name,
+                file
+            }
+        })
+
+        // try {
+        //     const response = await axios.post('http://localhost:4000/api/memorypost', formData);
+        //     console.log(response.data);
+        // } catch (error) {
+        //     console.error(error);
+        // }
 
     }
 
@@ -39,7 +48,7 @@ const PostMemory = () => {
     return (
         <div>
             <Col lg={6} className='mx-auto mt-3'>
-                <Form onSubmit={(e) => submitForm(e)} encType='multipart/form-data'>
+                <Form onSubmit={(e) => submitForm(e)}>
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Name</Form.Label>
                         <Form.Control type="text" placeholder="Name" name="name" onBlur={handleBlur} />
